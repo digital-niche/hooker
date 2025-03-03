@@ -1,0 +1,65 @@
+name: Hooker Project Setup
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Set Up Google Apps Script Deployment
+        run: |
+          echo "Deploying Google Apps Script Web App..."
+          echo "Ensure your Script ID is set in the project."
+
+      - name: Set Up GoHighLevel Webhooks
+        run: |
+          echo "Go to GoHighLevel Settings > API & Webhooks"
+          echo "Add the Webhook Endpoint: https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
+          echo "Enable triggers for Contact Created, Appointments, Opportunities, and Calls."
+
+      - name: Provide Guided UI Setup
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueTitle = '🚀 Hooker Setup Guide';
+            const issueBody = `### Follow these steps to complete your setup:
+
+            1. **Configure Google Apps Script Web App**
+               - Open [Google Apps Script](https://script.google.com/)
+               - Deploy the script as a Web App
+
+            2. **Set Up GitHub Codespaces**
+               - Open GitHub Codespaces for this repository
+               - Run \`npm install\`
+
+            3. **Connect Meta Business Login**
+               - Update your Meta OAuth Redirect URI
+
+            4. **Deploy and Run the App**
+               - Run \`npm run dev\`
+
+            **Click 'Close Issue' once setup is complete!** 🚀`;
+
+            const { data } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody
+            });
+            console.log(`Setup guide created: ${data.html_url}`);
